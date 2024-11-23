@@ -1,8 +1,9 @@
 import { useState, ChangeEvent } from "react";
+import type { Activity } from "../types";
 import { categories } from "../data/categories";
 
 export default function Form() {
-    const [activity, setActivity] = useState({
+    const [activity, setActivity] = useState<Activity>({
         category: 1,
         name: "",
         calories: 0,
@@ -11,10 +12,21 @@ export default function Form() {
     const handleChange = (
         event: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>
     ) => {
+        const isNumberField = ["category", "calories"].includes(
+            event.target.id
+        );
+
         setActivity({
             ...activity,
-            [event.target.id]: event.target.value,
+            [event.target.id]: isNumberField
+                ? +event.target.value
+                : event.target.value,
         });
+    };
+
+    const isValidActivity = () => {
+        const { name, calories } = activity;
+        return name.trim() !== "" && calories > 0;
     };
 
     return (
@@ -67,8 +79,9 @@ export default function Form() {
 
             <input
                 type="submit"
-                className="bg-gray-800 hover:bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer"
+                className="bg-gray-800 hover:bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer disabled:opacity-10"
                 value="Guardar Comida o Guardar Ejercicio"
+                disabled={!isValidActivity()}
             />
         </form>
     );
