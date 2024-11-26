@@ -1,13 +1,22 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, FormEvent, Dispatch } from "react";
+import { v4 as uuidv4 } from "uuid";
 import type { Activity } from "../types";
 import { categories } from "../data/categories";
+import { ActivityActions } from "../reducers/activityReducer";
 
-export default function Form() {
-    const [activity, setActivity] = useState<Activity>({
-        category: 1,
-        name: "",
-        calories: 0,
-    });
+type FromProps = {
+    dispatch: Dispatch<ActivityActions>;
+};
+
+const initialState: Activity = {
+    id: uuidv4(),
+    category: 1,
+    name: "",
+    calories: 0,
+};
+
+export default function Form({ dispatch }: FromProps) {
+    const [activity, setActivity] = useState<Activity>(initialState);
 
     const handleChange = (
         event: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>
@@ -29,8 +38,17 @@ export default function Form() {
         return name.trim() !== "" && calories > 0;
     };
 
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        dispatch({ type: "save-activity", payload: { newActivity: activity } });
+        setActivity({ ...initialState, id: uuidv4() });
+    };
+
     return (
-        <form className="space-y-5 bg-white shadow p-10 rounded-lg">
+        <form
+            className="space-y-5 bg-white shadow p-10 rounded-lg"
+            onSubmit={handleSubmit}
+        >
             <div className="grid grid-cols-1 gap-3">
                 <label className="font-bold" htmlFor="category">
                     Categoria:
@@ -80,7 +98,11 @@ export default function Form() {
             <input
                 type="submit"
                 className="bg-gray-800 hover:bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer disabled:opacity-10"
-                value="Guardar Comida o Guardar Ejercicio"
+                value={
+                    activity.category === 1
+                        ? "Guardar Comida"
+                        : "Guardar Ejercicio"
+                }
                 disabled={!isValidActivity()}
             />
         </form>
