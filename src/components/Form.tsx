@@ -1,59 +1,53 @@
-import { useState, ChangeEvent, FormEvent, Dispatch, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
-import type { Activity } from "../types";
-import { categories } from "../data/categories";
-import { ActivityActions, ActivityState } from "../reducers/activityReducer";
-
-type FromProps = {
-    dispatch: Dispatch<ActivityActions>;
-    state: ActivityState;
-};
+import { useState, ChangeEvent, FormEvent, useEffect } from "react"
+import { v4 as uuidv4 } from "uuid"
+import type { Activity } from "../types"
+import { categories } from "../data/categories"
+import { useActivity } from "../hooks/useActivity"
 
 const initialState: Activity = {
     id: uuidv4(),
     category: 1,
     name: "",
     calories: 0,
-};
+}
 
-export default function Form({ dispatch, state }: FromProps) {
-    const [activity, setActivity] = useState<Activity>(initialState);
+export default function Form() {
+    const { state, dispatch } = useActivity()
+    const [activity, setActivity] = useState<Activity>(initialState)
 
     useEffect(() => {
         if (state.activeId) {
             const selectActivity = state.activities.filter(
                 (stateActivity) => stateActivity.id === state.activeId
-            )[0];
-            
-            setActivity(selectActivity);
+            )[0]
+
+            setActivity(selectActivity)
         }
-    }, [state.activeId]);
+    }, [state.activeId])
 
     const handleChange = (
         event: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>
     ) => {
-        const isNumberField = ["category", "calories"].includes(
-            event.target.id
-        );
+        const isNumberField = ["category", "calories"].includes(event.target.id)
 
         setActivity({
             ...activity,
             [event.target.id]: isNumberField
                 ? +event.target.value
                 : event.target.value,
-        });
-    };
+        })
+    }
 
     const isValidActivity = () => {
-        const { name, calories } = activity;
-        return name.trim() !== "" && calories > 0;
-    };
+        const { name, calories } = activity
+        return name.trim() !== "" && calories > 0
+    }
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        dispatch({ type: "save-activity", payload: { newActivity: activity } });
-        setActivity({ ...initialState, id: uuidv4() });
-    };
+        event.preventDefault()
+        dispatch({ type: "save-activity", payload: { newActivity: activity } })
+        setActivity({ ...initialState, id: uuidv4() })
+    }
 
     return (
         <form
@@ -117,5 +111,5 @@ export default function Form({ dispatch, state }: FromProps) {
                 disabled={!isValidActivity()}
             />
         </form>
-    );
+    )
 }
